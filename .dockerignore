@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.pth
+.env
+.git
+chroma_db/

@@ -1,75 +1,129 @@
-# 🇺🇿 Uzbek Language RAG System
+# Uzbek Knowledge Base RAG System
 
-A question-answering system for Uzbek language documents.
+A Retrieval-Augmented Generation (RAG) system for answering questions over an Uzbek-language knowledge base. The system combines multilingual dense embeddings, vector search, and a fast open-weight LLM to deliver accurate, context-grounded answers in Uzbek.
 
-## Stack
-- **LLM:** Groq — llama-3.3-70b (free)
-- **Embedding:** multilingual-e5-large (local, free)
-- **Vector DB:** ChromaDB (local, free)
-- **PDF reading:** PyMuPDF
+## Features
 
-## Installation
+- **Multilingual semantic search** using `intfloat/multilingual-e5-large-instruct` embeddings, tuned for accurate retrieval in Uzbek text
+- **Vector storage & retrieval** powered by ChromaDB
+- **Fast LLM inference** via Groq's `llama-3.3-70b-versatile`
+- **REST API** built with FastAPI for easy integration
+- **Conversation history support** for multi-turn, context-aware dialogue
+- **Containerized deployment** with Docker for consistent, portable setup
 
-```bash
-pip install groq chromadb sentence-transformers pymupdf
-```
+## Tech Stack
 
-## Getting API Key
-
-1. Go to [console.groq.com](https://console.groq.com)
-2. Sign up (free)
-3. Create a new key under API Keys section
-4. Replace `YOUR_GROQ_API_KEY_HERE` in the notebook
-
-## Usage
-
-```python
-# Load TXT file
-add_document("file.txt")
-
-# Load PDF book
-add_pdf("book.pdf")
-
-# Ask a question
-answer = ask("What is the main idea of the book?")
-print(answer)
-```
-
-## Supported File Formats
-
-| Format | Status | Note |
-|--------|--------|------|
-| TXT | ✅ | Must be UTF-8 encoded |
-| MD | ✅ | Markdown files |
-| PDF | ✅ | Text-based PDF only |
-
-## Configuration
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| CHUNK_SIZE | 500 | Chunk size in characters |
-| CHUNK_OVERLAP | 50 | Overlap between chunks |
-| TOP_K | 3 | Number of chunks to retrieve |
+| Component | Technology |
+|---|---|
+| Embeddings | `intfloat/multilingual-e5-large-instruct` |
+| Vector DB | ChromaDB |
+| LLM | Groq (`llama-3.3-70b-versatile`) |
+| Backend | FastAPI |
+| Deployment | Docker |
 
 ## Architecture
 
 ```
-Document (PDF/TXT)
+User Query (Uzbek)
       │
       ▼
-  chunk_text()  ──→  500-character chunks
+Embedding Model (multilingual-e5-large-instruct)
       │
       ▼
-  embedder.encode()  ──→  Vectors
+ChromaDB Vector Search  ──► Top-K relevant chunks
       │
       ▼
-  ChromaDB  ──→  Stored
-      │
-  [When a question is asked]
+Groq LLM (llama-3.3-70b-versatile)
       │
       ▼
-  search()  ──→  Top 3 relevant chunks
-      │
-      ▼
-  Groq API  ──→  Answer in Uzbek
+Context-grounded Answer
 ```
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- Docker (optional, for containerized run)
+- A Groq API key ([console.groq.com](https://console.groq.com))
+
+### Installation
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+   cd YOUR_REPO
+   ```
+
+2. Create a virtual environment and install dependencies
+   ```bash
+   python -m venv venv
+   source venv/bin/activate   # on Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+
+3. Configure environment variables
+   ```bash
+   cp .env.example .env
+   ```
+   Then open `.env` and add your Groq API key:
+   ```
+   GROQ_API_KEY=your_api_key_here
+   ```
+
+### Running Locally
+
+```bash
+uvicorn main:app --reload
+```
+
+The API will be available at `http://localhost:8000`.
+
+### Running with Docker
+
+```bash
+docker build -t uzbek-rag .
+docker run -p 8000:8000 --env-file .env uzbek-rag
+```
+
+## Usage
+
+Send a query to the API endpoint:
+
+```bash
+curl -X POST http://localhost:8000/query \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Savolingiz shu yerda"}'
+```
+
+The system will retrieve relevant context chunks from the knowledge base and generate a grounded answer using the LLM.
+
+## Project Structure
+
+```
+.
+├── app/                # Core application code (embedding, retrieval, generation)
+├── data/               # Source documents / knowledge base
+├── chroma_db/          # Vector store (gitignored)
+├── Dockerfile
+├── .dockerignore
+├── .gitignore
+├── .env.example
+├── requirements.txt
+└── README.md
+```
+
+## Roadmap
+
+- [ ] Add evaluation metrics for retrieval quality
+- [ ] Support additional document formats
+- [ ] Add streaming responses
+- [ ] Deploy to a cloud platform
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Author
+
+Built by Odilbek Baxtiyarov as part of an ongoing portfolio of applied ML/AI projects.
